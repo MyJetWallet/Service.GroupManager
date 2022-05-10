@@ -19,7 +19,7 @@ namespace Service.GroupManager.Client
         
         public static void RegisterGroupManagerClientCached(this ContainerBuilder builder, string grpcServiceUrl, IMyNoSqlSubscriber myNoSqlSubscriber)
         {
-            var groupSubs = new MyNoSqlReadRepository<GroupNoSqlEntity>(myNoSqlSubscriber, ClientGroupsProfileNoSqlEntity.TableName);
+            var groupSubs = new MyNoSqlReadRepository<GroupNoSqlEntity>(myNoSqlSubscriber, GroupNoSqlEntity.TableName);
             var clientSubs = new MyNoSqlReadRepository<ClientGroupsProfileNoSqlEntity>(myNoSqlSubscriber, ClientGroupsProfileNoSqlEntity.TableName);
 
             var factory = new GroupManagerClientFactory(grpcServiceUrl, clientSubs, groupSubs);
