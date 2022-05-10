@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyNoSqlServer.Abstractions;
+using Service.Fees.Domain.Models;
 using Service.GroupManager.Domain.Models;
 using Service.GroupManager.Domain.Models.NoSql;
 using Service.GroupManager.Postgres;
@@ -43,13 +44,18 @@ namespace Service.GroupManager.Helpers
         {
             await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
             var group = await context.Groups.ToListAsync();
+            if (!group.Any())
+                group.Add(await CreateDefaultGroup());
+            
             await RefreshGroupCache();
             return group;
         }
         public async Task<Group> GetFirstGroup()
         {
             await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
-            var group = context.Groups.MinBy(t => t.Weight);
+            var group = await context.Groups.FirstOrDefaultAsync();
+            if (group == null)
+                group = await CreateDefaultGroup();
             return group;
         }
 
@@ -110,6 +116,20 @@ namespace Service.GroupManager.Helpers
         {
             await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
             return await context.ClientProfiles.Where(t => t.GroupId == groupId).Skip(skip).Take(take).ToListAsync();
+        }
+
+        private async Task<Group> CreateDefaultGroup()
+        {
+            var group = new Group
+            {
+                GroupId = "DEFAULT",
+                WithdrawalProfileId = FeeProfileConsts.DefaultProfile,
+                //ConverterProfileId = MarkupProfileConsts.DefaultProfile,
+                ConverterProfileId = "DEFAULT",
+                InterestRateProfileId = "DEFAULT"
+            };
+            await UpsertGroups(new[] {group});
+            return group;
         }
     }
 }

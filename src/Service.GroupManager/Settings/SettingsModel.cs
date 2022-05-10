@@ -17,6 +17,9 @@ namespace Service.GroupManager.Settings
         [YamlProperty("GroupManager.MyNoSqlWriterUrl")]
         public string MyNoSqlWriterUrl { get; set; }
         
+        [YamlProperty("GroupManager.MyNoSqlReaderHostPort")]
+        public string MyNoSqlReaderHostPort { get; set; }
+        
         [YamlProperty("GroupManager.SpotServiceBusHostPort")]
         public string SpotServiceBusHostPort { get; set; }
         
@@ -26,7 +29,7 @@ namespace Service.GroupManager.Settings
         [YamlProperty("GroupManager.MaxCachedEntities")]
         public int MaxCachedEntities { get; set; }
 
-        [YamlProperty("GroupManager.PersonalDataServiceUrl")]
-        public string PersonalDataServiceUrl { get; set; }
+        [YamlProperty("GroupManager.PersonalDataGrpcServiceUrl")]
+        public string PersonalDataGrpcServiceUrl { get; set; }
     }
 }

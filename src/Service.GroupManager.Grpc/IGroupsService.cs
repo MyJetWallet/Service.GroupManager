@@ -10,15 +10,26 @@ namespace Service.GroupManager.Grpc
     {
         [OperationContract]
         Task<ClientGroupsProfile> GetOrCreateClientGroupProfile(GetOrClientProfileRequest request);
+        
         [OperationContract]
         Task<GetUsersResponse> GetUsersByGroup(GetUsersRequest request);
+        
         [OperationContract]
         Task<OperationResponse> AssignUsersToGroup(AssignUsersToGroupRequest request);
+        
         [OperationContract]
         Task<GroupsResponse> GetGroups();
+        
         [OperationContract]
         Task<OperationResponse> CreateOrUpdateGroup(CreateOrUpdateGroupRequest request);
+        
         [OperationContract]
         Task<OperationResponse> DeleteGroup(DeleteGroupRequest request);
+        
+        [OperationContract]
+        Task<ProfilesListResponse> GetAvailableProfiles();
+
+        [OperationContract]
+        Task<ProfileWithGroupResponse> GetOrCreateClientProfileWithGroup(GetOrClientProfileRequest request);
     }
 }

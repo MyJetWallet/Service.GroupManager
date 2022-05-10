@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using MyNoSqlServer.Abstractions;
+using Service.Fees.MyNoSql;
 using Service.GroupManager.Domain.Models;
 using Service.GroupManager.Grpc;
 using Service.GroupManager.Grpc.Models;
 using Service.GroupManager.Helpers;
+using Service.Liquidity.ConverterMarkups.Domain.Models;
 using Service.PersonalData.Grpc;
 using Service.PersonalData.Grpc.Contracts;
 
@@ -17,12 +20,15 @@ namespace Service.GroupManager.Services
         private readonly ILogger<GroupService> _logger;
         private readonly GroupsRepository _repository;
         private readonly IPersonalDataServiceGrpc _personalData;
-
-        public GroupService(GroupsRepository repository, ILogger<GroupService> logger, IPersonalDataServiceGrpc personalData)
+        private readonly IMyNoSqlServerDataReader<FeeProfilesNoSqlEntity> _feesReader;
+        private readonly IMyNoSqlServerDataReader<MarkupProfilesNoSqlEntity> _markupReader;
+        public GroupService(GroupsRepository repository, ILogger<GroupService> logger, IPersonalDataServiceGrpc personalData, IMyNoSqlServerDataReader<FeeProfilesNoSqlEntity> feesReader, IMyNoSqlServerDataReader<MarkupProfilesNoSqlEntity> markupReader)
         {
             _repository = repository;
             _logger = logger;
             _personalData = personalData;
+            _feesReader = feesReader;
+            _markupReader = markupReader;
         }
 
         public async Task<ClientGroupsProfile> GetOrCreateClientGroupProfile(string clientId)
@@ -42,7 +48,7 @@ namespace Service.GroupManager.Services
                 {
                     ClientId = clientId,
                     GroupId = group.GroupId,
-                    ClientEmail = pd.PersonalData.Email
+                    ClientEmail = pd.PersonalData?.Email ?? String.Empty
                 };
                 
                 await _repository.UpsertProfile(new[] {profile});
@@ -126,9 +132,9 @@ namespace Service.GroupManager.Services
                     GroupId = request.GroupId
                 };
 
-                group.ConverterGroupId = request.ConverterGroupId;
-                group.WithdrawalGroupId = request.WithdrawalGroupId;
-                group.InterestRateGroupId = request.InterestRateGroupId;
+                group.ConverterProfileId = request.ConverterGroupId;
+                group.WithdrawalProfileId = request.WithdrawalGroupId;
+                group.InterestRateProfileId = request.InterestRateGroupId;
 
                 await _repository.UpsertGroups(new[] {group});
                 return new OperationResponse();
@@ -156,6 +162,29 @@ namespace Service.GroupManager.Services
                 Console.WriteLine(e);
                 throw;
             }
+        }
+
+        public async Task<ProfilesListResponse> GetAvailableProfiles()
+        {
+            var fees = _feesReader.Get(FeeProfilesNoSqlEntity.GeneratePartitionKey(), FeeProfilesNoSqlEntity.GenerateRowKey());
+            var markups = _markupReader.Get(MarkupProfilesNoSqlEntity.GeneratePartitionKey(), MarkupProfilesNoSqlEntity.GenerateRowKey());
+            return new ProfilesListResponse
+            {
+                ConverterProfiles = fees?.Profiles ?? new List<string>(),
+                WithdrawalProfiles = markups?.Profiles ?? new List<string>(),
+                InterestProfiles = new List<string>() {"NOT_IMPLEMENTED_YET"}
+            };
+        }
+
+        public async Task<ProfileWithGroupResponse> GetOrCreateClientProfileWithGroup(string requestClientId)
+        {
+            var profile = await GetOrCreateClientGroupProfile(requestClientId);
+            var group = await _repository.GetGroupById(profile.GroupId);
+            return new ProfileWithGroupResponse()
+            {
+                Profile = profile,
+                Group = group
+            };
         }
     }
 }
