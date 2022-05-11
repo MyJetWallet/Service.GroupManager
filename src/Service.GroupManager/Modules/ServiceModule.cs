@@ -16,7 +16,7 @@ namespace Service.GroupManager.Modules
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterPersonalDataClient(Program.Settings.PersonalDataGrpcServiceUrl);
-            var myNoSqlClient = builder.CreateNoSqlClient(() => Program.Settings.MyNoSqlReaderHostPort);
+            var myNoSqlClient = builder.CreateNoSqlClient(Program.Settings.MyNoSqlReaderHostPort, Program.LogFactory);
 
             builder.RegisterMyNoSqlReader<FeeProfilesNoSqlEntity>(myNoSqlClient, FeeProfilesNoSqlEntity.TableName);
             builder.RegisterMyNoSqlReader<MarkupProfilesNoSqlEntity>(myNoSqlClient, MarkupProfilesNoSqlEntity.TableName);
