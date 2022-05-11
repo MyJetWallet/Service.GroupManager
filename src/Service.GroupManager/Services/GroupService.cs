@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MyNoSqlServer.Abstractions;
 using Service.Fees.MyNoSql;
@@ -9,6 +10,7 @@ using Service.GroupManager.Domain.Models;
 using Service.GroupManager.Grpc;
 using Service.GroupManager.Grpc.Models;
 using Service.GroupManager.Helpers;
+using Service.GroupManager.Postgres;
 using Service.Liquidity.ConverterMarkups.Domain.Models;
 using Service.PersonalData.Grpc;
 using Service.PersonalData.Grpc.Contracts;
@@ -22,13 +24,16 @@ namespace Service.GroupManager.Services
         private readonly IPersonalDataServiceGrpc _personalData;
         private readonly IMyNoSqlServerDataReader<FeeProfilesNoSqlEntity> _feesReader;
         private readonly IMyNoSqlServerDataReader<MarkupProfilesNoSqlEntity> _markupReader;
-        public GroupService(GroupsRepository repository, ILogger<GroupService> logger, IPersonalDataServiceGrpc personalData, IMyNoSqlServerDataReader<FeeProfilesNoSqlEntity> feesReader, IMyNoSqlServerDataReader<MarkupProfilesNoSqlEntity> markupReader)
+        private readonly DbContextOptionsBuilder<DatabaseContext> _dbContextOptionsBuilder;
+
+        public GroupService(GroupsRepository repository, ILogger<GroupService> logger, IPersonalDataServiceGrpc personalData, IMyNoSqlServerDataReader<FeeProfilesNoSqlEntity> feesReader, IMyNoSqlServerDataReader<MarkupProfilesNoSqlEntity> markupReader, DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder)
         {
             _repository = repository;
             _logger = logger;
             _personalData = personalData;
             _feesReader = feesReader;
             _markupReader = markupReader;
+            _dbContextOptionsBuilder = dbContextOptionsBuilder;
         }
 
         public async Task<ClientGroupsProfile> GetOrCreateClientGroupProfile(string clientId)
@@ -68,7 +73,7 @@ namespace Service.GroupManager.Services
                 if (request.Take == 0)
                     request.Take = 20;
                 
-                var users = await _repository.GetProfilesByGroup(request.GroupId, request.Skip, request.Take);
+                var users = await _repository.GetProfilesByGroup(request.GroupId, request.Skip, request.Take, request.SearchText);
                 return new GetUsersResponse()
                 {
                     Profiles = users
@@ -111,9 +116,21 @@ namespace Service.GroupManager.Services
         {
             try
             {
+                var response = new List<GroupResponse>();
+                var groups = await _repository.GetGroups();
+                await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
+
+                foreach (var group in groups)
+                {
+                    response.Add(new GroupResponse()
+                    {
+                        Group = group,
+                        UserCount = await context.ClientProfiles.Where(t=>t.GroupId == group.GroupId).CountAsync()
+                    });
+                }
                 return new GroupsResponse()
                 {
-                    Groups = await _repository.GetGroups()
+                    Groups = response
                 };
             }
             catch (Exception e)
@@ -150,7 +167,7 @@ namespace Service.GroupManager.Services
         {
             try
             {
-                var users = await _repository.GetProfilesByGroup(request.GroupId, 0, 100);
+                var users = await _repository.GetProfilesByGroup(request.GroupId, 0, 100, null);
                 if (users.Any())
                     return new OperationResponse("Group is not empty");
                 

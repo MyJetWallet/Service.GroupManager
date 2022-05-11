@@ -10,6 +10,5 @@ namespace Service.GroupManager.Domain.Models
         [DataMember(Order = 3)] public string WithdrawalProfileId { get; set; }
         [DataMember(Order = 4)] public string InterestRateProfileId { get; set; }
         [DataMember(Order = 5)] public int Weight { get; set; }
-
     }
 }

@@ -53,9 +53,7 @@ namespace Service.GroupManager.Helpers
         public async Task<Group> GetFirstGroup()
         {
             await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
-            var group = await context.Groups.FirstOrDefaultAsync();
-            if (group == null)
-                group = await CreateDefaultGroup();
+            var group = await context.Groups.FirstOrDefaultAsync() ?? await CreateDefaultGroup();
             return group;
         }
 
@@ -112,10 +110,14 @@ namespace Service.GroupManager.Helpers
             return profile;
         }
         
-        public async Task<List<ClientGroupsProfile>> GetProfilesByGroup(string groupId, int skip, int take)
+        public async Task<List<ClientGroupsProfile>> GetProfilesByGroup(string groupId, int skip, int take, string searchText)
         {
             await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
-            return await context.ClientProfiles.Where(t => t.GroupId == groupId).Skip(skip).Take(take).ToListAsync();
+            var query = context.ClientProfiles.Where(t => t.GroupId == groupId);
+            if (!string.IsNullOrWhiteSpace(searchText))
+                query = query.Where(t => t.ClientEmail.Contains(searchText) || t.ClientId.Contains(searchText));
+            query = query.Skip(skip).Take(take);
+            return await query.ToListAsync();
         }
 
         private async Task<Group> CreateDefaultGroup()

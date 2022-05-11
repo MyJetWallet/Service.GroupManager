@@ -8,5 +8,17 @@ namespace Service.GroupManager.Grpc.Models;
 public class GroupsResponse
 {
     [DataMember(Order = 1)]
-    public List<Group> Groups { get; set; }
+    public List<GroupResponse> Groups { get; set; }
+
+    
 }
+
+[DataContract]
+public class GroupResponse
+{
+    [DataMember(Order = 1)]
+    public Group Group { get; set; }
+    [DataMember(Order = 2)]
+    public int UserCount { get; set; }
+}
+
