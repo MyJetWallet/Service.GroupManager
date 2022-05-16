@@ -187,8 +187,8 @@ namespace Service.GroupManager.Services
             var markups = _markupReader.Get(MarkupProfilesNoSqlEntity.GeneratePartitionKey(), MarkupProfilesNoSqlEntity.GenerateRowKey());
             return new ProfilesListResponse
             {
-                ConverterProfiles = fees?.Profiles ?? new List<string>(),
-                WithdrawalProfiles = markups?.Profiles ?? new List<string>(),
+                ConverterProfiles = markups?.Profiles ?? new List<string>(),
+                WithdrawalProfiles = fees?.Profiles ?? new List<string>(),
                 InterestProfiles = new List<string>() {"NOT_IMPLEMENTED_YET"}
             };
         }
