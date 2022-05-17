@@ -149,6 +149,13 @@ namespace Service.GroupManager.Services
                     GroupId = request.GroupId
                 };
 
+                if (string.IsNullOrWhiteSpace(request.ConverterGroupId) ||
+                    string.IsNullOrWhiteSpace(request.WithdrawalGroupId) ||
+                    string.IsNullOrWhiteSpace(request.InterestRateGroupId))
+                {
+                    return new OperationResponse("ProfilesIds are required");
+                }
+
                 group.ConverterProfileId = request.ConverterGroupId;
                 group.WithdrawalProfileId = request.WithdrawalGroupId;
                 group.InterestRateProfileId = request.InterestRateGroupId;
