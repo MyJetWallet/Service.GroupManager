@@ -79,6 +79,7 @@ namespace Service.GroupManager.Helpers
             if (group != null)
             {
                 context.Groups.Remove(group);
+                await context.SaveChangesAsync();
                 await RefreshGroupCache();
             }
         }
