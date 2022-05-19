@@ -153,7 +153,11 @@ namespace Service.GroupManager.Services
                     string.IsNullOrWhiteSpace(request.WithdrawalGroupId) ||
                     string.IsNullOrWhiteSpace(request.InterestRateGroupId))
                 {
-                    return new OperationResponse("ProfilesIds are required");
+                    return new OperationResponse()
+                    {
+                        IsSuccess = false,
+                        ErrorMessage = "ProfilesIds are required"
+                    };
                 }
 
                 group.ConverterProfileId = request.ConverterGroupId;
@@ -176,7 +180,11 @@ namespace Service.GroupManager.Services
             {
                 var users = await _repository.GetProfilesByGroup(request.GroupId, 0, 100, null);
                 if (users.Any())
-                    return new OperationResponse("Group is not empty");
+                    return new OperationResponse()
+                    {
+                        IsSuccess = false,
+                        ErrorMessage = "Group is not empty"
+                    };
                 
                 await _repository.RemoveGroupById(request.GroupId);
                 return new OperationResponse();
