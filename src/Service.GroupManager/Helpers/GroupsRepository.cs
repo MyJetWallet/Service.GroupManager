@@ -27,7 +27,7 @@ namespace Service.GroupManager.Helpers
         {
             await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
             await context.UpsertAsync(profiles);
-            await _profileWriter.BulkInsertOrReplaceAsync(profiles.Select(ClientGroupsProfileNoSqlEntity.Create));
+            await _profileWriter.BulkInsertOrReplaceAsync(profiles.Select(ClientGroupsProfileNoSqlEntity.Create).ToList());
             await _profileWriter.CleanAndKeepMaxRecords(ClientGroupsProfileNoSqlEntity.GeneratePartitionKey(),
                 Program.Settings.MaxCachedEntities);
         }
@@ -88,7 +88,7 @@ namespace Service.GroupManager.Helpers
         {
             await using var context = new DatabaseContext(_dbContextOptionsBuilder.Options);
             var groups = await context.Groups.ToListAsync();
-            await _groupWriter.CleanAndBulkInsertAsync(groups.Select(GroupNoSqlEntity.Create));
+            await _groupWriter.CleanAndBulkInsertAsync(groups.Select(GroupNoSqlEntity.Create).ToList());
         }
 
         public async Task<ClientGroupsProfile> GetProfile(string clientId)
