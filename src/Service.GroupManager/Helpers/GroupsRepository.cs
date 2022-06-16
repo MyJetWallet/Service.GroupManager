@@ -7,6 +7,7 @@ using Service.Fees.Domain.Models;
 using Service.GroupManager.Domain.Models;
 using Service.GroupManager.Domain.Models.NoSql;
 using Service.GroupManager.Postgres;
+using Service.Liquidity.ConverterMarkups.Domain.Models;
 
 namespace Service.GroupManager.Helpers
 {
@@ -127,9 +128,9 @@ namespace Service.GroupManager.Helpers
             {
                 GroupId = "DEFAULT",
                 WithdrawalProfileId = FeeProfileConsts.DefaultProfile,
-                //ConverterProfileId = MarkupProfileConsts.DefaultProfile,
-                ConverterProfileId = "DEFAULT",
-                InterestRateProfileId = "DEFAULT"
+                ConverterProfileId = MarkupProfileConsts.DefaultProfile,
+                InterestRateProfileId = "DEFAULT",
+                DepositProfileId = FeeProfileConsts.DefaultProfile
             };
             await UpsertGroups(new[] {group});
             return group;
