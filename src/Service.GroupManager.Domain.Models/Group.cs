@@ -11,6 +11,6 @@ namespace Service.GroupManager.Domain.Models
         [DataMember(Order = 4)] public string InterestRateProfileId { get; set; }
         [DataMember(Order = 5)] public int Weight { get; set; }
         [DataMember(Order = 6)] public string DepositProfileId { get; set; }
-
+        [DataMember(Order = 7)] public string AssetSettingsProfileId { get; set; }
     }
 }

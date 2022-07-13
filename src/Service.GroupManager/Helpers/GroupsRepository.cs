@@ -130,7 +130,8 @@ namespace Service.GroupManager.Helpers
                 WithdrawalProfileId = FeeProfileConsts.DefaultProfile,
                 ConverterProfileId = MarkupProfileConsts.DefaultProfile,
                 InterestRateProfileId = "DEFAULT",
-                DepositProfileId = FeeProfileConsts.DefaultProfile
+                DepositProfileId = FeeProfileConsts.DefaultProfile,
+                AssetSettingsProfileId = MarkupProfileConsts.DefaultProfile,
             };
             await UpsertGroups(new[] {group});
             return group;

@@ -10,4 +10,5 @@ public class CreateOrUpdateGroupRequest
     [DataMember(Order = 3)] public string WithdrawalGroupId { get; set; }
     [DataMember(Order = 4)] public string InterestRateGroupId { get; set; }
     [DataMember(Order = 5)] public string DepositProfileId { get; set; }
+    [DataMember(Order = 6)] public string AssetSettingsProfileId { get; set; }
 }

@@ -152,7 +152,8 @@ namespace Service.GroupManager.Services
                 if (string.IsNullOrWhiteSpace(request.ConverterGroupId) ||
                     string.IsNullOrWhiteSpace(request.WithdrawalGroupId) ||
                     string.IsNullOrWhiteSpace(request.InterestRateGroupId) ||
-                    string.IsNullOrWhiteSpace(request.DepositProfileId))
+                    string.IsNullOrWhiteSpace(request.DepositProfileId) ||
+                    string.IsNullOrWhiteSpace(request.AssetSettingsProfileId))
                 {
                     return new OperationResponse()
                     {
@@ -165,6 +166,7 @@ namespace Service.GroupManager.Services
                 group.WithdrawalProfileId = request.WithdrawalGroupId;
                 group.InterestRateProfileId = request.InterestRateGroupId;
                 group.DepositProfileId = request.DepositProfileId;
+                group.AssetSettingsProfileId = request.AssetSettingsProfileId;
 
                 await _repository.UpsertGroups(new[] {group});
                 return new OperationResponse();
@@ -208,6 +210,7 @@ namespace Service.GroupManager.Services
                 WithdrawalProfiles = fees?.Profiles ?? new List<string>(),
                 InterestProfiles = new List<string>() {"NOT_IMPLEMENTED_YET"},
                 DepositProfiles = fees?.DepositProfiles ?? new List<string>(),
+                AssetSettingsProfiles = new List<string>() { "NOT_IMPLEMENTED_YET" },
             };
         }
 
