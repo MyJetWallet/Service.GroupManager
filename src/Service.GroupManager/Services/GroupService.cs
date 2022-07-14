@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MyNoSqlServer.Abstractions;
+using Service.AssetSettings.MyNoSql;
 using Service.Fees.MyNoSql;
 using Service.GroupManager.Domain.Models;
 using Service.GroupManager.Grpc;
@@ -25,8 +26,10 @@ namespace Service.GroupManager.Services
         private readonly IMyNoSqlServerDataReader<FeeProfilesNoSqlEntity> _feesReader;
         private readonly IMyNoSqlServerDataReader<MarkupProfilesNoSqlEntity> _markupReader;
         private readonly DbContextOptionsBuilder<DatabaseContext> _dbContextOptionsBuilder;
+        private readonly IMyNoSqlServerDataReader<ProfilesNoSqlEntity> _profilesReader;
 
-        public GroupService(GroupsRepository repository, ILogger<GroupService> logger, IPersonalDataServiceGrpc personalData, IMyNoSqlServerDataReader<FeeProfilesNoSqlEntity> feesReader, IMyNoSqlServerDataReader<MarkupProfilesNoSqlEntity> markupReader, DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder)
+        public GroupService(GroupsRepository repository, ILogger<GroupService> logger, IPersonalDataServiceGrpc personalData, IMyNoSqlServerDataReader<FeeProfilesNoSqlEntity> feesReader, IMyNoSqlServerDataReader<MarkupProfilesNoSqlEntity> markupReader, DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
+            IMyNoSqlServerDataReader<ProfilesNoSqlEntity> profilesReader)
         {
             _repository = repository;
             _logger = logger;
@@ -34,6 +37,7 @@ namespace Service.GroupManager.Services
             _feesReader = feesReader;
             _markupReader = markupReader;
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
+            this._profilesReader = profilesReader;
         }
 
         public async Task<ClientGroupsProfile> GetOrCreateClientGroupProfile(string clientId)
@@ -204,13 +208,16 @@ namespace Service.GroupManager.Services
         {
             var fees = _feesReader.Get(FeeProfilesNoSqlEntity.GeneratePartitionKey(), FeeProfilesNoSqlEntity.GenerateRowKey());
             var markups = _markupReader.Get(MarkupProfilesNoSqlEntity.GeneratePartitionKey(), MarkupProfilesNoSqlEntity.GenerateRowKey());
+            var assetSettings = _profilesReader.Get(ProfilesNoSqlEntity.GeneratePartitionKey(),
+                ProfilesNoSqlEntity.GenerateRowKey());
+
             return new ProfilesListResponse
             {
                 ConverterProfiles = markups?.Profiles ?? new List<string>(),
                 WithdrawalProfiles = fees?.Profiles ?? new List<string>(),
                 InterestProfiles = new List<string>() {"NOT_IMPLEMENTED_YET"},
                 DepositProfiles = fees?.DepositProfiles ?? new List<string>(),
-                AssetSettingsProfiles = new List<string>() { "NOT_IMPLEMENTED_YET" },
+                AssetSettingsProfiles = assetSettings?.Profiles ?? new List<string>() { "NOT_IMPLEMENTED_YET" },
             };
         }
 

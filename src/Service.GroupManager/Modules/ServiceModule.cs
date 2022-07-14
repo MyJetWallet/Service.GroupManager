@@ -8,6 +8,8 @@ using Service.GroupManager.Helpers;
 using Service.GroupManager.Services;
 using Service.Liquidity.ConverterMarkups.Domain.Models;
 using Service.PersonalData.Client;
+using Service.AssetSettings.Client;
+using Service.AssetSettings.MyNoSql;
 
 namespace Service.GroupManager.Modules
 {
@@ -20,6 +22,9 @@ namespace Service.GroupManager.Modules
 
             builder.RegisterMyNoSqlReader<FeeProfilesNoSqlEntity>(myNoSqlClient, FeeProfilesNoSqlEntity.TableName);
             builder.RegisterMyNoSqlReader<MarkupProfilesNoSqlEntity>(myNoSqlClient, MarkupProfilesNoSqlEntity.TableName);
+            builder.RegisterMyNoSqlReader<ProfilesNoSqlEntity>(myNoSqlClient, ProfilesNoSqlEntity.TableName);
+            builder.RegisterMyNoSqlReader<AssetSettingsNoSqlEntity>(myNoSqlClient, AssetSettingsNoSqlEntity.TableName);
+
 
             builder.RegisterMyNoSqlWriter<GroupNoSqlEntity>(() => Program.Settings.MyNoSqlWriterUrl,
                 GroupNoSqlEntity.TableName);
